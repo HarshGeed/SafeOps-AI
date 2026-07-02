@@ -36,8 +36,6 @@ export const profiles = pgTable("profiles", {
     .notNull()
     .unique(),
 
-  emailVerified: boolean("email_verified").default(false).notNull(),
-
   countryCode: varchar("country_code", {
     length: 5,
   }),

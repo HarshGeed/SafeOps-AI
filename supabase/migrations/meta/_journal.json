@@ -71,6 +71,13 @@
       "when": 1782710874006,
       "tag": "0009_rare_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782929876520,
+      "tag": "0010_perfect_lady_mastermind",
+      "breakpoints": true
     }
   ]
 }
