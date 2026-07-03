@@ -78,6 +78,20 @@
       "when": 1782929876520,
       "tag": "0010_perfect_lady_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782967246810,
+      "tag": "0011_familiar_vision",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1782967406169,
+      "tag": "0012_youthful_black_cat",
+      "breakpoints": true
     }
   ]
 }

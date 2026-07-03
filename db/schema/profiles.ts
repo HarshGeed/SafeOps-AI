@@ -48,13 +48,13 @@ export const profiles = pgTable("profiles", {
     length: 500,
   }),
 
-  department: varchar("department", {
-    length: 100,
-  }),
+  // department: varchar("department", {
+  //   length: 100,
+  // }),
 
-  designation: varchar("designation", {
-    length: 100,
-  }),
+  // designation: varchar("designation", {
+  //   length: 100,
+  // }),
 
   role: userRoleEnum("role").default("worker").notNull(),
 

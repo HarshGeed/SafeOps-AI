@@ -14,6 +14,7 @@ export async function signup(
   _prevState: SignupState,
   formData: FormData
 ): Promise<SignupState> {
+
   const values = Object.fromEntries(formData);
 
   const result = signUpSchema.safeParse(values);

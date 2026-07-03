@@ -30,20 +30,88 @@ export async function login(
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { error } = await supabase.auth.signInWithPassword({
+  // Authenticate user
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (error) {
+  if(!user?.email_confirmed_at){
+    await supabase.auth.signOut();
+
+    return{
+      success: false,
+      message: "Please verify your email address before signing in"
+    }
+  }
+
+  if (error || !user) {
     return {
       success: false,
-      message: error.message,
+      message: error?.message ?? "Invalid email or password.",
     };
   }
 
-  return {
-    success: true,
-    message: "Login successful.",
-  };
+  // Fetch user's profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("status, role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    await supabase.auth.signOut();
+
+    return {
+      success: false,
+      message: "Profile not found. Please contact the administrator.",
+    };
+  }
+
+  // Account approval checks
+  switch (profile.status) {
+    case "pending":
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        message:
+          "Your account is awaiting administrator approval.",
+      };
+
+    case "rejected":
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        message:
+          "Your account has been rejected. Please contact the administrator.",
+      };
+
+    case "inactive":
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        message:
+          "Your account has been deactivated. Please contact the administrator.",
+      };
+
+    case "active":
+      return {
+        success: true,
+        message: "Login successful.",
+      };
+
+    default:
+      await supabase.auth.signOut();
+
+      return {
+        success: false,
+        message: "Invalid account status.",
+      };
+  }
 }

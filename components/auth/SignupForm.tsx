@@ -24,7 +24,7 @@ export function SignupForm() {
 
   useEffect(() => {
     if (state.success) {
-      router.push("/auth/waiting");
+      router.push("/auth/check-email");
     }
   }, [state.success, router]);
 
