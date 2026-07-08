@@ -44,31 +44,42 @@ export function ApproveUserDialog({
 }: Props) {
   const [open, setOpen] = useState(false);
 
-  const [employeeCode, setEmployeeCode] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
+
+  const [role, setRole] = useState<
+    "admin" | "supervisor" | "safety_officer" | "worker"
+  >("worker");
+
   const [department, setDepartment] = useState("");
+
   const [designation, setDesignation] = useState("");
+
   const [zoneId, setZoneId] = useState("");
+
+  const isWorker = role === "worker";
 
   const handleApprove = async () => {
     await approveUser({
       profileId: user.id,
-      employeeCode,
-      department,
-      designation,
-      zoneId,
+      employeeId,
+      role,
+      department: isWorker ? department : undefined,
+      designation: isWorker ? designation : undefined,
+      zoneId: isWorker ? zoneId : undefined,
     });
 
     setOpen(false);
   };
 
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Approve</Button>
+        <Button size="sm">
+          Approve
+        </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             Approve {user.first_name} {user.last_name}
@@ -77,64 +88,134 @@ export function ApproveUserDialog({
 
         <div className="space-y-4">
           <div>
-            <Label>Employee Code</Label>
+            <Label>Employee ID</Label>
 
             <Input
-              value={employeeCode}
-              onChange={(e) => setEmployeeCode(e.target.value)}
+              value={employeeId}
+              onChange={(e) =>
+                setEmployeeId(e.target.value)
+              }
+              placeholder="EMP001"
             />
           </div>
 
           <div>
-            <Label>Department</Label>
+            <Label>Role</Label>
 
-            <Select value={department} onValueChange={setDepartment}>
+            <Select
+              value={role}
+              onValueChange={(value) =>
+                setRole(
+                  value as
+                    | "admin"
+                    | "supervisor"
+                    | "safety_officer"
+                    | "worker"
+                )
+              }
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select Department" />
+                <SelectValue placeholder="Select Role" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="production">Production</SelectItem>
+                <SelectItem value="admin">
+                  Admin
+                </SelectItem>
 
-                <SelectItem value="maintenance">Maintenance</SelectItem>
+                <SelectItem value="supervisor">
+                  Supervisor
+                </SelectItem>
 
-                <SelectItem value="quality">Quality</SelectItem>
+                <SelectItem value="safety_officer">
+                  Safety Officer
+                </SelectItem>
 
-                <SelectItem value="safety">Safety</SelectItem>
-
-                <SelectItem value="warehouse">Warehouse</SelectItem>
+                <SelectItem value="worker">
+                  Worker
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <Label>Designation</Label>
+          {isWorker && (
+            <>
+              <div>
+                <Label>Department</Label>
 
-            <Input
-              value={designation}
-              onChange={(e) => setDesignation(e.target.value)}
-            />
-          </div>
+                <Select
+                  value={department}
+                  onValueChange={setDepartment}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
 
-          <div>
-            <Label>Zone ID</Label>
+                  <SelectContent>
+                    <SelectItem value="production">
+                      Production
+                    </SelectItem>
 
-            <Select value={zoneId} onValueChange={setZoneId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Zone" />
-              </SelectTrigger>
+                    <SelectItem value="maintenance">
+                      Maintenance
+                    </SelectItem>
 
-              <SelectContent>
-                {zones.map((zone) => (
-                  <SelectItem key={zone.id} value={zone.id}>
-                    {zone.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <SelectItem value="quality">
+                      Quality
+                    </SelectItem>
 
-          <Button className="w-full" onClick={handleApprove}>
+                    <SelectItem value="safety">
+                      Safety
+                    </SelectItem>
+
+                    <SelectItem value="warehouse">
+                      Warehouse
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Designation</Label>
+
+                <Input
+                  value={designation}
+                  onChange={(e) =>
+                    setDesignation(e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <Label>Zone</Label>
+
+                <Select
+                  value={zoneId}
+                  onValueChange={setZoneId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Zone" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {zones.map((zone) => (
+                      <SelectItem
+                        key={zone.id}
+                        value={zone.id}
+                      >
+                        {zone.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          <Button
+            className="w-full"
+            onClick={handleApprove}
+          >
             Approve User
           </Button>
         </div>

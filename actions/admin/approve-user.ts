@@ -7,15 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 
 type ApproveUserInput = {
   profileId: string;
-  employeeCode: string;
-  department: string;
-  designation: string;
-  zoneId: string;
+  employeeId: string;
+  role: "admin" | "supervisor" | "safety_officer" | "worker";
+
+  department?: string;
+  designation?: string;
+  zoneId?: string;
 };
 
 export async function approveUser({
   profileId,
-  employeeCode,
+  employeeId,
+  role,
   department,
   designation,
   zoneId,
@@ -35,25 +38,39 @@ export async function approveUser({
   const { error: profileError } = await supabase
     .from("profiles")
     .update({
+      employee_id: employeeId,
+      role,
       status: "active",
       approved_by: admin.id,
       approved_at: new Date().toISOString(),
     })
     .eq("id", profileId);
 
-  if (profileError) throw profileError;
+  if (profileError) {
+    throw profileError;
+  }
 
-  const { error: workerError } = await supabase
-    .from("workers")
-    .insert({
-      profile_id: profileId,
-      employee_code: employeeCode,
-      department,
-      designation,
-      zone_id: zoneId,
-    });
+  if (role === "worker") {
+    if (!department || !designation || !zoneId) {
+      throw new Error(
+        "Department, designation and zone are required for workers."
+      );
+    }
 
-  if (workerError) throw workerError;
+    const { error: workerError } = await supabase
+      .from("workers")
+      .insert({
+        profile_id: profileId,
+        department,
+        designation,
+        zone_id: zoneId,
+        status: "working",
+      });
+
+    if (workerError) {
+      throw workerError;
+    }
+  }
 
   revalidatePath("/dashboard/admin/users");
 }

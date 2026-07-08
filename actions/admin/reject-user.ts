@@ -10,12 +10,24 @@ export async function rejectUser(profileId: string) {
 
   const supabase = createClient(cookieStore);
 
-  await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  const { error } = await supabase
     .from("profiles")
     .update({
       status: "rejected",
     })
     .eq("id", profileId);
+
+  if (error) {
+    throw error;
+  }
 
   revalidatePath("/dashboard/admin/users");
 }

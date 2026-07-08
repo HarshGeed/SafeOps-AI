@@ -1,72 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { rejectUser } from "@/actions/admin/reject-user";
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
 
-export function RejectUserDialog({
-    profileId,
-}: {
-    profileId: string;
-}) {
-    const [open, setOpen] = useState(false);
+type Props = {
+  profileId: string;
+};
 
-    async function handleReject() {
+export function RejectUserDialog({
+  profileId,
+}: Props) {
+  const [open, setOpen] = useState(false);
+
+  const [isPending, startTransition] = useTransition();
+
+  const handleReject = () => {
+    startTransition(async () => {
+      try {
         await rejectUser(profileId);
         setOpen(false);
-    }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  };
 
-    return (
-        <AlertDialog
-            open={open}
-            onOpenChange={setOpen}
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="destructive"
+          size="sm"
         >
-            <AlertDialogTrigger asChild>
-                <Button
-                    variant="destructive"
-                    size="sm"
-                >
-                    Reject
-                </Button>
-            </AlertDialogTrigger>
+          Reject
+        </Button>
+      </AlertDialogTrigger>
 
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>
-                        Reject User?
-                    </AlertDialogTitle>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Reject User?
+          </AlertDialogTitle>
 
-                    <AlertDialogDescription>
-                        This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+          <AlertDialogDescription>
+            This will reject the users registration.
+            They will not be able to log in unless an
+            administrator approves them later.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-                <AlertDialogFooter>
-                    <AlertDialogCancel>
-                        Cancel
-                    </AlertDialogCancel>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>
+            Cancel
+          </AlertDialogCancel>
 
-                    <AlertDialogAction
-                        onClick={handleReject}
-                    >
-                        Reject
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+          <AlertDialogAction
+            disabled={isPending}
+            onClick={handleReject}
+          >
+            {isPending
+              ? "Rejecting..."
+              : "Reject User"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }

@@ -34,11 +34,11 @@ export const workers = pgTable("workers", {
       onDelete: "set null",
     }),
 
-  employeeCode: varchar("employee_code", {
-    length: 30,
-  })
-    .notNull()
-    .unique(),
+  // employeeCode: varchar("employee_code", {
+  //   length: 30,
+  // })
+  //   .notNull()
+  //   .unique(),
 
   department: departmentEnum("department")
     .notNull(),
