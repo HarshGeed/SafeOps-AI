@@ -55,6 +55,10 @@ export const workers = pgTable("workers", {
     .default(true)
     .notNull(),
 
+  isArchived: boolean("is_archived")
+    .default(false)
+    .notNull(),
+
   lastSeen: timestamp("last_seen", {
     withTimezone: true,
   }),

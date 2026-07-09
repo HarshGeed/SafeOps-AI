@@ -2,12 +2,12 @@ import { requireAuth } from "@/lib/auth/require-auth";
 
 import { DashboardCards } from "@/components/dashboard/dashboard-cards";
 
-import { DashboardService } from "@/services/dashboard/dashboard.service";
+import { getDashboardStats } from "@/services/dashboard/dashboard.service";
 
 export default async function DashboardPage() {
   const profile = await requireAuth();
 
-  const stats = await DashboardService.getStats();
+  const stats = await getDashboardStats();
 
   return (
     <div className="space-y-8">

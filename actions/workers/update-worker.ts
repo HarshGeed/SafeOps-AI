@@ -1,30 +1,51 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
-import {
-  workerSchema,
-} from "@/lib/validations/worker";
+import { createClient } from "@/lib/supabase/server";
 
-import { WorkerService } from "@/services/workers/worker.service";
+type UpdateWorkerInput = {
+  department: string;
+  designation: string;
+  status: "working" | "break" | "offline" | "emergency";
+  zoneId: string;
+};
 
 export async function updateWorker(
-  id: string,
-  values: unknown
+  workerId: string,
+  {
+    department,
+    designation,
+    status,
+    zoneId,
+  }: UpdateWorkerInput
 ) {
-  const result =
-    workerSchema.safeParse(values);
+  const cookieStore = await cookies();
 
-  if (!result.success) {
-    throw new Error(
-      result.error.issues[0].message
-    );
+  const supabase = createClient(cookieStore);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
   }
 
-  await WorkerService.updateWorker(
-    id,
-    result.data
-  );
+  const { error } = await supabase
+    .from("workers")
+    .update({
+      department,
+      designation,
+      status,
+      zone_id: zoneId || null,
+    })
+    .eq("id", workerId);
+
+  if (error) {
+    throw error;
+  }
 
   revalidatePath("/dashboard/workers");
 }

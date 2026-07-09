@@ -1,71 +1,67 @@
-import { cookies } from "next/headers";
+import { count } from "drizzle-orm";
 
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/db";
 
-export class DashboardService {
-  static async getStats() {
-    const cookieStore = await cookies();
+import {
+    workers,
+    machines,
+    alerts,
+    permits,
+    incidents,
+    maintenance,
+} from "@/db";
 
-    const supabase = createClient(cookieStore);
+export async function getDashboardStats() {
 
     const [
-      workers,
-      machines,
-      incidents,
-      permits,
-      maintenance,
-      alerts,
+        workerCount,
+        machineCount,
+        alertCount,
+        permitCount,
+        incidentCount,
+        maintenanceCount,
     ] = await Promise.all([
-      supabase
-        .from("workers")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
 
-      supabase
-        .from("machines")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
+        db.select({
+            count: count(),
+        }).from(workers),
 
-      supabase
-        .from("incidents")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
+        db.select({
+            count: count(),
+        }).from(machines),
 
-      supabase
-        .from("permits")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
+        db.select({
+            count: count(),
+        }).from(alerts),
 
-      supabase
-        .from("maintenance")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
+        db.select({
+            count: count(),
+        }).from(permits),
 
-      supabase
-        .from("alerts")
-        .select("*", {
-          count: "exact",
-          head: true,
-        }),
+        db.select({
+            count: count(),
+        }).from(incidents),
+
+        db.select({
+            count: count(),
+        }).from(maintenance),
+
     ]);
 
     return {
-      workers: workers.count ?? 0,
-      machines: machines.count ?? 0,
-      incidents: incidents.count ?? 0,
-      permits: permits.count ?? 0,
-      maintenance: maintenance.count ?? 0,
-      alerts: alerts.count ?? 0,
+
+        workers: workerCount[0].count,
+
+        machines: machineCount[0].count,
+
+        alerts: alertCount[0].count,
+
+        permits: permitCount[0].count,
+
+        incidents: incidentCount[0].count,
+
+        maintenance: maintenanceCount[0].count,
+
     };
-  }
+
 }

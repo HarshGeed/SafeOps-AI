@@ -1,34 +1,40 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useMemo, useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+
+import { EditWorkerDialog } from "./EditWorkerDialog";
+import { WorkerDetailsDialog } from "./WorkerDetailsDialog";
+import { ArchiveWorkerDialog } from "./ArchiveWorkerDialog";
 
 type Worker = {
   id: string;
 
-  employee_code: string;
+  department: string;
 
   designation: string;
 
-  department: string;
+  status: "working" | "break" | "offline" | "emergency";
 
-  status: string;
+  helmetDetected: boolean;
 
-  profiles: {
-    first_name: string;
+  lastSeen: Date | null;
 
-    last_name: string;
+  profile: {
+    employeeId: string | null;
+
+    firstName: string;
+
+    lastName: string;
 
     email: string;
   };
 
-  zones: {
+  zone: {
+    id: string;
+
     name: string;
   } | null;
 };
@@ -38,54 +44,158 @@ export function WorkersTable({
 }: {
   workers: Worker[];
 }) {
+  const [search, setSearch] = useState("");
+
+  const filteredWorkers = useMemo(() => {
+    const query = search.toLowerCase();
+
+    return workers.filter((worker) => {
+      return (
+        worker.profile.employeeId
+          ?.toLowerCase()
+          .includes(query) ||
+        worker.profile.firstName
+          .toLowerCase()
+          .includes(query) ||
+        worker.profile.lastName
+          .toLowerCase()
+          .includes(query)
+      );
+    });
+  }, [workers, search]);
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Employee</TableHead>
+    <div className="space-y-4">
+      <Input
+        placeholder="Search by Employee ID or Name..."
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+      />
 
-          <TableHead>Email</TableHead>
+      <div className="rounded-lg border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-muted">
+            <tr>
+              <th className="p-3 text-left">
+                Employee ID
+              </th>
 
-          <TableHead>Department</TableHead>
+              <th className="p-3 text-left">
+                Name
+              </th>
 
-          <TableHead>Designation</TableHead>
+              <th className="p-3 text-left">
+                Department
+              </th>
 
-          <TableHead>Zone</TableHead>
+              <th className="p-3 text-left">
+                Designation
+              </th>
 
-          <TableHead>Status</TableHead>
-        </TableRow>
-      </TableHeader>
+              <th className="p-3 text-left">
+                Zone
+              </th>
 
-      <TableBody>
-        {workers.map((worker) => (
-          <TableRow key={worker.id}>
-            <TableCell>
-              {worker.profiles.first_name}{" "}
-              {worker.profiles.last_name}
-            </TableCell>
+              <th className="p-3 text-left">
+                Status
+              </th>
 
-            <TableCell>
-              {worker.profiles.email}
-            </TableCell>
+              <th className="p-3 text-center">
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-            <TableCell>
-              {worker.department}
-            </TableCell>
+          <tbody>
+            {filteredWorkers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="py-10 text-center text-muted-foreground"
+                >
+                  No workers found.
+                </td>
+              </tr>
+            )}
 
-            <TableCell>
-              {worker.designation}
-            </TableCell>
+            {filteredWorkers.map((worker) => (
+              <tr
+                key={worker.id}
+                className="border-t"
+              >
+                <td className="p-3">
+                  {worker.profile.employeeId}
+                </td>
 
-            <TableCell>
-              {worker.zones?.name ?? "-"}
-            </TableCell>
+                <td className="p-3">
+                  {worker.profile.firstName}{" "}
+                  {worker.profile.lastName}
+                </td>
 
-            <TableCell>
-              {worker.status}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+                <td className="p-3">
+                  {worker.department}
+                </td>
+
+                <td className="p-3">
+                  {worker.designation}
+                </td>
+
+                <td className="p-3">
+                  {worker.zone?.name ?? "-"}
+                </td>
+
+                <td className="p-3">
+                  {worker.status ===
+                    "working" && (
+                    <Badge>
+                      Working
+                    </Badge>
+                  )}
+
+                  {worker.status ===
+                    "break" && (
+                    <Badge variant="secondary">
+                      Break
+                    </Badge>
+                  )}
+
+                  {worker.status ===
+                    "offline" && (
+                    <Badge variant="destructive">
+                      Offline
+                    </Badge>
+                  )}
+
+                  {worker.status ===
+                    "emergency" && (
+                    <Badge variant="destructive">
+                      Emergency
+                    </Badge>
+                  )}
+                </td>
+
+                <td className="p-3">
+                  <div className="flex justify-center gap-2">
+                    <WorkerDetailsDialog
+                      worker={worker}
+                    />
+
+                    <EditWorkerDialog
+                      worker={worker}
+                    />
+
+                    <ArchiveWorkerDialog
+                      workerId={worker.id}
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

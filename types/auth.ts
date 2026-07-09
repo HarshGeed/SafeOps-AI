@@ -5,3 +5,5 @@ export type AuthState = {
 
   fieldErrors?: Record<string, string[]>;
 };
+
+export type UserRole = "admin" | "supervisor" | "saftey_officer" | "worker";
