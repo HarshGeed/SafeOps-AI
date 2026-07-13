@@ -1,17 +1,9 @@
-import { count } from "drizzle-orm";
-
-import { db } from "@/db";
-
-import {
-    workers,
-    machines,
-    alerts,
-    permits,
-    incidents,
-    maintenance,
-} from "@/db";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getDashboardStats() {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
     const [
         workerCount,
@@ -22,45 +14,45 @@ export async function getDashboardStats() {
         maintenanceCount,
     ] = await Promise.all([
 
-        db.select({
-            count: count(),
-        }).from(workers),
+        supabase
+            .from("workers")
+            .select("*", { count: "exact", head: true }),
 
-        db.select({
-            count: count(),
-        }).from(machines),
+        supabase
+            .from("machines")
+            .select("*", { count: "exact", head: true }),
 
-        db.select({
-            count: count(),
-        }).from(alerts),
+        supabase
+            .from("alerts")
+            .select("*", { count: "exact", head: true }),
 
-        db.select({
-            count: count(),
-        }).from(permits),
+        supabase
+            .from("permits")
+            .select("*", { count: "exact", head: true }),
 
-        db.select({
-            count: count(),
-        }).from(incidents),
+        supabase
+            .from("incidents")
+            .select("*", { count: "exact", head: true }),
 
-        db.select({
-            count: count(),
-        }).from(maintenance),
+        supabase
+            .from("maintenance")
+            .select("*", { count: "exact", head: true }),
 
     ]);
 
     return {
 
-        workers: workerCount[0].count,
+        workers: workerCount.count || 0,
 
-        machines: machineCount[0].count,
+        machines: machineCount.count || 0,
 
-        alerts: alertCount[0].count,
+        alerts: alertCount.count || 0,
 
-        permits: permitCount[0].count,
+        permits: permitCount.count || 0,
 
-        incidents: incidentCount[0].count,
+        incidents: incidentCount.count || 0,
 
-        maintenance: maintenanceCount[0].count,
+        maintenance: maintenanceCount.count || 0,
 
     };
 

@@ -8,7 +8,6 @@ export const approveUserSchema = z.object({
     "maintenance",
     "quality",
     "safety",
-    "warehouse",
   ]),
   designation: z.string().min(2).max(100),
   zoneId: z.uuid(),

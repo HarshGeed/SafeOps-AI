@@ -50,22 +50,33 @@ export function ApproveUserDialog({
     "admin" | "supervisor" | "safety_officer" | "worker"
   >("worker");
 
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState<
+    "production" | "maintenance" | "quality" | "safety" | ""
+  >("");
 
   const [designation, setDesignation] = useState("");
 
   const [zoneId, setZoneId] = useState("");
 
   const isWorker = role === "worker";
+  const workerDepartment = isWorker && department
+    ? department
+    : undefined;
+  const workerDesignation = isWorker
+    ? designation || undefined
+    : undefined;
+  const workerZoneId = isWorker
+    ? zoneId || undefined
+    : undefined;
 
   const handleApprove = async () => {
     await approveUser({
       profileId: user.id,
       employeeId,
       role,
-      department: isWorker ? department : undefined,
-      designation: isWorker ? designation : undefined,
-      zoneId: isWorker ? zoneId : undefined,
+      department: workerDepartment,
+      designation: workerDesignation,
+      zoneId: workerZoneId,
     });
 
     setOpen(false);
@@ -145,7 +156,16 @@ export function ApproveUserDialog({
 
                 <Select
                   value={department}
-                  onValueChange={setDepartment}
+                  onValueChange={(value) =>
+                    setDepartment(
+                      value as
+                        | "production"
+                        | "maintenance"
+                        | "quality"
+                        | "safety"
+                        | ""
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Department" />
@@ -166,10 +186,6 @@ export function ApproveUserDialog({
 
                     <SelectItem value="safety">
                       Safety
-                    </SelectItem>
-
-                    <SelectItem value="warehouse">
-                      Warehouse
                     </SelectItem>
                   </SelectContent>
                 </Select>

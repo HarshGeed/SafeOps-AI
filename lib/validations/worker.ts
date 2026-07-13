@@ -13,7 +13,6 @@ export const workerSchema = z.object({
     "maintenance",
     "quality",
     "safety",
-    "warehouse",
   ]),
 
   designation: z

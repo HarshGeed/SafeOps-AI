@@ -122,10 +122,6 @@ export function EditWorkerDialog({
                 <SelectItem value="safety">
                   Safety
                 </SelectItem>
-
-                <SelectItem value="warehouse">
-                  Warehouse
-                </SelectItem>
               </SelectContent>
             </Select>
           </div>

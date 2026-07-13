@@ -51,13 +51,13 @@ export function WorkersTable({
 
     return workers.filter((worker) => {
       return (
-        worker.profile.employeeId
-          ?.toLowerCase()
-          .includes(query) ||
-        worker.profile.firstName
+        (worker.profile?.employeeId ?? "")
           .toLowerCase()
           .includes(query) ||
-        worker.profile.lastName
+        (worker.profile?.firstName ?? "")
+          .toLowerCase()
+          .includes(query) ||
+        (worker.profile?.lastName ?? "")
           .toLowerCase()
           .includes(query)
       );

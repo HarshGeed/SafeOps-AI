@@ -1,8 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
+import { getCurrentProfile } from "@/lib/auth/get-current-profile";
 import { createClient } from "@/lib/supabase/server";
 
 type ApproveUserInput = {
@@ -10,7 +11,11 @@ type ApproveUserInput = {
   employeeId: string;
   role: "admin" | "supervisor" | "safety_officer" | "worker";
 
-  department?: string;
+  department?:
+    | "production"
+    | "maintenance"
+    | "quality"
+    | "safety";
   designation?: string;
   zoneId?: string;
 };
@@ -23,17 +28,14 @@ export async function approveUser({
   designation,
   zoneId,
 }: ApproveUserInput) {
-  const cookieStore = await cookies();
+  const admin = await getCurrentProfile();
 
-  const supabase = createClient(cookieStore);
-
-  const {
-    data: { user: admin },
-  } = await supabase.auth.getUser();
-
-  if (!admin) {
+  if (!admin || admin.role !== "admin") {
     throw new Error("Unauthorized");
   }
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
 
   const { error: profileError } = await supabase
     .from("profiles")
